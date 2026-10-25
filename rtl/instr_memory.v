@@ -11,19 +11,16 @@ module instr_memory #(
 );
 
     reg [15:0] mem [0:511];
+    reg [8191:0] image_path;
 
     initial begin
-        $readmemh(IMAGE, mem);
+        if (!$value$plusargs("IMEM=%s", image_path))
+            image_path = IMAGE;
+        $readmemh(image_path, mem);
     end
 
-    // Section 2.4 (R4): read-only, not writable by any instruction.
-    // Combinational read keeps this simple; a registered read is also
-    // acceptable as long as it is accounted for in your microarchitecture
-    // (Section 4.3) and does not change how many cycles you claim.
     assign data = mem[addr];
 
-    // verilator lint_off UNUSEDSIGNAL
     wire unused_clk = clk;
-    // verilator lint_on UNUSEDSIGNAL
 
 endmodule

@@ -84,9 +84,11 @@ module tb_alu_example;
         input [7:0] fa, fb;
         input [3:0] fop;
         reg result7, a7;
+        reg [7:0] rv;
         begin
             a7 = fa[7];
-            result7 = expected_result(fa, fb, fop)[7];
+            rv = expected_result(fa, fb, fop);
+            result7 = rv[7];
             case (fop)
                 4'h4:    expected_overflow = (fa[7] == fb[7]) && (result7 != a7);
                 4'h5, 4'hB: expected_overflow = (fa[7] != fb[7]) && (result7 != a7);

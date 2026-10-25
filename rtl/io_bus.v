@@ -1,26 +1,7 @@
-// io_bus.v -- port address decode and the io_ready handshake
-// Owner: member C -- this is YOUR module; you are individually examined
-// on it at the oral defence.
-// Spec: Section 7. The CPU-facing side of this module (the six signals
-// wired to dsd8_cpu) is frozen by Section 7.1's signal table. The
-// board/peripheral-facing side below is NOT dictated verbatim by the
-// spec excerpts this template was built from -- treat those ports as a
-// starting design, confirm them against your own course's Section 5.11
-// if one exists, and adjust freely; unlike dsd8_cpu, no external
-// testbench binds to io_bus's peripheral-facing ports by name.
-//
-// What is required (Section 7.1, R19-R21): decode io_port into the
-// right peripheral, forward io_rd/io_wr and stall the CPU (by holding
-// io_ready low) until the addressed peripheral is ready. Ports 0x00 to
-// 0x3F are reserved and behave exactly per Section 7.2's table; reads
-// of an unmapped port return 0x00, writes to one are discarded, and no
-// port may ever hold io_ready low indefinitely.
-
 module io_bus (
     input  wire        clk,
     input  wire        rst_n,
 
-    // ---- CPU-facing side: matches dsd8_cpu's io_* ports exactly ----
     input  wire [7:0]  io_port,
     input  wire [7:0]  io_wdata,
     output wire [7:0]  io_rdata,
@@ -28,14 +9,12 @@ module io_bus (
     input  wire        io_wr,
     output wire        io_ready,
 
-    // ---- board-facing side (Section 7.2 standard port map) ----
-    input  wire [7:0]  switches,     // port 0x00
-    input  wire [4:0]  buttons,      // port 0x01
-    output reg  [7:0]  leds,         // port 0x02
-    output reg  [7:0]  seg_value,    // port 0x10
-    output reg  [7:0]  seg_enable,   // port 0x11
+    input  wire [7:0]  switches,
+    input  wire [4:0]  buttons,
+    output reg  [7:0]  leds,
+    output reg  [7:0]  seg_value,
+    output reg  [7:0]  seg_enable,
 
-    // ---- forwarded to sim/peripherals.v for UART / timer / SLOW_ECHO ----
     output wire [7:0]  periph_port,
     output wire [7:0]  periph_wdata,
     input  wire [7:0]  periph_rdata,
@@ -44,36 +23,54 @@ module io_bus (
     input  wire        periph_ready
 );
 
-    // Safe placeholder: no peripheral ever finishes (io_ready stays low
-    // forever), so this compiles and lints clean but will hang the CPU
-    // the first time it is used. Implement the decode + handshake per
-    // Section 7.1 before wiring this into dsd8_top or tb_dsd8.v.
+    wire request = io_rd | io_wr;
+    wire is_local  = (io_port < 8'h20);
+    wire is_periph = (io_port >= 8'h20);
+    wire is_sw     = (io_port == 8'h00);
+    wire is_btn    = (io_port == 8'h01);
+    wire is_led    = (io_port == 8'h02);
+    wire is_seg_v  = (io_port == 8'h10);
+    wire is_seg_e  = (io_port == 8'h11);
 
-    assign io_rdata     = 8'h00;
-    assign io_ready      = 1'b0;
-    assign periph_port  = io_port;
-    assign periph_wdata = io_wdata;
-    assign periph_rd    = 1'b0;
-    assign periph_wr    = 1'b0;
+    reg local_ready;
+    reg [7:0] local_rdata;
+
+    always @(*) begin
+        local_ready = 1'b0;
+        local_rdata = 8'h00;
+        if (request && is_local) begin
+            local_ready = 1'b1;
+            if (io_rd) begin
+                case (io_port)
+                    8'h00: local_rdata = switches;
+                    8'h01: local_rdata = {3'b000, buttons};
+                    default: local_rdata = 8'h00;
+                endcase
+            end
+        end
+    end
 
     always @(posedge clk) begin
         if (!rst_n) begin
             leds       <= 8'h00;
             seg_value  <= 8'h00;
             seg_enable <= 8'h00;
-        end else begin
-            // TODO: decode io_port/io_wr and update leds/seg_value/seg_enable
-            leds       <= leds;
-            seg_value  <= seg_value;
-            seg_enable <= seg_enable;
+        end else if (request && is_local && io_wr) begin
+            case (io_port)
+                8'h02: leds       <= io_wdata;
+                8'h10: seg_value  <= io_wdata;
+                8'h11: seg_enable <= io_wdata;
+            endcase
         end
     end
 
-    // verilator lint_off UNUSEDSIGNAL
-    wire [7:0] unused_switches   = switches;
-    wire [4:0] unused_buttons    = buttons;
-    wire [7:0] unused_periph_rd  = periph_rdata;
-    wire       unused_periph_rdy = periph_ready;
-    // verilator lint_on UNUSEDSIGNAL
+    assign periph_port  = io_port;
+    assign periph_wdata = io_wdata;
+    assign periph_rd    = request && is_periph && io_rd;
+    assign periph_wr    = request && is_periph && io_wr;
+
+    wire periph_act = request && is_periph;
+    assign io_rdata  = is_local ? local_rdata : periph_rdata;
+    assign io_ready  = is_local ? local_ready : (periph_act ? periph_ready : 1'b1);
 
 endmodule
