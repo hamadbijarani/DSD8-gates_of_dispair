@@ -23,22 +23,21 @@ module data_memory (
     input  wire [7:0] addr,
     input  wire       we,
     input  wire [7:0] wdata,
-    output wire [7:0] rdata     // combinational read
+    output wire [7:0] rdata
 );
 
     reg [7:0] mem [0:255];
+    integer i;
 
-    always @(posedge clk) begin
-        // TODO: if (we) mem[addr] <= wdata;
+    initial begin
+        for (i = 0; i < 256; i = i + 1)
+            mem[i] = 8'h00;
     end
 
-    // TODO: assign rdata = mem[addr];
-    assign rdata = 8'h00;
+    always @(posedge clk) begin
+        if (we) mem[addr] <= wdata;
+    end
 
-    // verilator lint_off UNUSEDSIGNAL
-    wire [7:0] unused_addr  = addr;
-    wire [7:0] unused_wdata = wdata;
-    wire       unused_we    = we;
-    // verilator lint_on UNUSEDSIGNAL
+    assign rdata = mem[addr];
 
 endmodule
