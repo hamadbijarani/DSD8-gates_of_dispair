@@ -35,6 +35,7 @@ RTL_SOURCES = [
     "dsd8_cpu.v", "prog_counter.v", "instr_memory.v", "instr_decoder.v",
     "register_file.v", "alu.v", "flags_reg.v", "data_memory.v",
     "control_unit.v", "io_bus.v",
+    "nn_accel.v", "nn_mac_pipe.v", "nn_act.v", "nn_lut_rom.v",
 ]
 
 

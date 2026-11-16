@@ -32,6 +32,9 @@ module dsd8_cpu (
     wire [3:0] cur_opcode;
     wire [2:0] cur_rd, cur_rs1, cur_rs2;
     wire [7:0] cur_port;
+    wire [7:0] dec_imm8;
+    wire [8:0] dec_addr9;
+    wire [2:0] dec_cond;
     wire       io_dir;
 
     wire       pc_en, pc_load;
@@ -79,12 +82,12 @@ module dsd8_cpu (
         .instr(current_ir),
         .opcode(cur_opcode),
         .rd(cur_rd), .rs1(cur_rs1), .rs2(cur_rs2),
-        .imm8(), .addr9(),
-        .cond(), .port(cur_port), .io_dir(io_dir)
+        .imm8(dec_imm8), .addr9(dec_addr9),
+        .cond(dec_cond), .port(cur_port), .io_dir(io_dir)
     );
 
     assign imem_addr = pc;
-    assign branch_addr = current_ir[8:0];
+    assign branch_addr = dec_addr9;
 
     prog_counter pc_inst (
         .clk(clk), .rst_n(rst_n),
@@ -137,7 +140,7 @@ module dsd8_cpu (
 
     control_unit ctrl_inst (
         .clk(clk), .rst_n(rst_n),
-        .opcode(cur_opcode), .cond(current_ir[11:9]), .flags(flags_out),
+        .opcode(cur_opcode), .cond(dec_cond), .flags(flags_out),
         .io_ready(io_ready), .io_dir(io_dir),
         .pc_en(pc_en), .pc_load(pc_load),
         .rf_we(ctrl_rf_we), .mem_we(ctrl_mem_we),
@@ -165,7 +168,7 @@ module dsd8_cpu (
         case (wb_sel)
             2'b00: writeback_data = alu_result;
             2'b01: writeback_data = dmem_rdata;
-            2'b10: writeback_data = current_ir[7:0];
+            2'b10: writeback_data = dec_imm8;
             2'b11: writeback_data = io_rdata_lat;
             default: writeback_data = alu_result;
         endcase

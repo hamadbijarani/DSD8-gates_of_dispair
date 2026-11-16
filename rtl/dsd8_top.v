@@ -14,9 +14,14 @@ module dsd8_top (
     wire [7:0]  io_port, io_wdata, io_rdata;
     wire        io_rd, io_wr, io_ready;
     wire [7:0]  seg_value, seg_enable;
-    wire [7:0]  periph_port, periph_wdata, periph_rdata;
-    wire        periph_rd, periph_wr, periph_ready;
+    // verilator lint_off UNUSED
+    wire [7:0]  periph_port, periph_wdata;
+    wire        periph_rd, periph_wr;
+    // verilator lint_on UNUSED
+    wire [7:0]  periph_rdata = 8'h00;
+    wire        periph_ready = 1'b1;
 
+    // verilator lint_off UNUSED
     wire        retire;
     wire [8:0]  retire_pc;
     wire [15:0] retire_ir;
@@ -27,6 +32,7 @@ module dsd8_top (
     wire [7:0]  retire_mem_addr;
     wire [7:0]  retire_mem_data;
     wire [3:0]  retire_flags;
+    // verilator lint_on UNUSED
 
     instr_memory imem (
         .clk(clk),
@@ -58,6 +64,11 @@ module dsd8_top (
         .periph_rdata(periph_rdata), .periph_rd(periph_rd),
         .periph_wr(periph_wr), .periph_ready(periph_ready)
     );
+
+    // verilator lint_off UNUSED
+    wire unused_seg = seg_value[7];
+    wire [3:0] unused_an = seg_enable[7:4];
+    // verilator lint_on UNUSED
 
     assign seg = seg_value[6:0];
     assign an  = seg_enable[3:0];

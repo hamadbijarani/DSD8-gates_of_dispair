@@ -1,4 +1,7 @@
-module io_bus (
+module io_bus #(
+    parameter NN_ENABLE = 1,
+    parameter NN_POSTED = 0
+) (
     input  wire        clk,
     input  wire        rst_n,
 
@@ -24,8 +27,9 @@ module io_bus (
 );
 
     wire request = io_rd | io_wr;
+    wire nn_hit = NN_ENABLE && (io_port >= 8'h50) && (io_port <= 8'h5F);
     wire is_local  = (io_port < 8'h20);
-    wire is_periph = (io_port >= 8'h20);
+    wire is_periph = (io_port >= 8'h20) && !nn_hit;
     wire is_sw     = (io_port == 8'h00);
     wire is_btn    = (io_port == 8'h01);
     wire is_led    = (io_port == 8'h02);
@@ -41,11 +45,9 @@ module io_bus (
         if (request && is_local) begin
             local_ready = 1'b1;
             if (io_rd) begin
-                case (io_port)
-                    8'h00: local_rdata = switches;
-                    8'h01: local_rdata = {3'b000, buttons};
-                    default: local_rdata = 8'h00;
-                endcase
+                if (is_sw)       local_rdata = switches;
+                else if (is_btn) local_rdata = {3'b000, buttons};
+                else             local_rdata = 8'h00;
             end
         end
     end
@@ -56,21 +58,27 @@ module io_bus (
             seg_value  <= 8'h00;
             seg_enable <= 8'h00;
         end else if (request && is_local && io_wr) begin
-            case (io_port)
-                8'h02: leds       <= io_wdata;
-                8'h10: seg_value  <= io_wdata;
-                8'h11: seg_enable <= io_wdata;
-            endcase
+            if (is_led)        leds       <= io_wdata;
+            else if (is_seg_v) seg_value  <= io_wdata;
+            else if (is_seg_e) seg_enable <= io_wdata;
         end
     end
+
+    wire [7:0] nn_rdata;
+    wire       nn_ready;
+
+    nn_accel #(.POSTED(NN_POSTED)) nn (
+        .clk(clk), .rst_n(rst_n),
+        .io_port(io_port), .io_wdata(io_wdata), .io_rdata(nn_rdata),
+        .io_rd(io_rd), .io_wr(io_wr), .io_ready(nn_ready)
+    );
 
     assign periph_port  = io_port;
     assign periph_wdata = io_wdata;
     assign periph_rd    = request && is_periph && io_rd;
     assign periph_wr    = request && is_periph && io_wr;
 
-    wire periph_act = request && is_periph;
-    assign io_rdata  = is_local ? local_rdata : periph_rdata;
-    assign io_ready  = is_local ? local_ready : (periph_act ? periph_ready : 1'b1);
+    assign io_rdata  = nn_hit ? nn_rdata : (is_local ? local_rdata : periph_rdata);
+    assign io_ready  = !request ? 1'b0 : (nn_hit ? nn_ready : (is_local ? local_ready : periph_ready));
 
 endmodule

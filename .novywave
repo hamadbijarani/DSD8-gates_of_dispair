@@ -1,0 +1,38 @@
+# NovyWave User Configuration
+# This file stores your application preferences and workspace state
+
+[app]
+version = "1.0.0"
+
+[ui]
+theme = "dark"
+toast_dismiss_ms = 10000
+
+[workspace]
+opened_files = []
+dock_mode = "right"
+expanded_scopes = []
+load_files_expanded_directories = []
+load_files_scroll_position = 0
+selected_variables = []
+signal_groups = []
+
+[workspace.docked_bottom_dimensions]
+files_and_scopes_panel_width = 1400.0
+files_and_scopes_panel_height = 600.0
+
+[workspace.docked_right_dimensions]
+files_and_scopes_panel_width = 400.0
+files_and_scopes_panel_height = 300.0
+
+[workspace.timeline]
+cursor_position_ps = 0
+visible_range_start_ps = 0
+visible_range_end_ps = 1000000000000
+zoom_center_ps = 0
+tooltip_enabled = true
+markers = []
+
+[plugins]
+schema_version = 1
+entries = []

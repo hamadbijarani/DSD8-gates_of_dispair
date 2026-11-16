@@ -14,8 +14,11 @@ module instr_memory #(
     reg [8191:0] image_path;
 
     initial begin
+        // verilator lint_off WIDTH
+        image_path = IMAGE;
+        // verilator lint_on WIDTH
         if (!$value$plusargs("IMEM=%s", image_path))
-            image_path = IMAGE;
+            image_path = image_path;
         $readmemh(image_path, mem);
     end
 
