@@ -1,0 +1,23 @@
+# Generated simulation output (regenerate with the Makefile targets)
+build/
+__pycache__/
+*.pyc
+
+# Downloaded / generated CNN data (cnn/train_cnn.py + cnn/quantize_cnn.py)
+cnn/data/mnist/
+cnn/data/model_float.npz
+
+# Generated benchmark programs (make nn / make cnn; bench targets regenerate)
+tests/nn/
+tests/cnn/
+
+# Stray artifacts
+/metrics.txt
+/dut.trace
+.novywave
+
+# Personal docs and local-only material
+doc/
+.git/
+PROJECT_DOCUMENTATION_AND_REPORT.md
+STUDENT_GUIDE.md
