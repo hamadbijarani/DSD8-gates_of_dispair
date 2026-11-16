@@ -35,6 +35,7 @@ RTL_SOURCES = [
     "dsd8_cpu.v", "prog_counter.v", "instr_memory.v", "instr_decoder.v",
     "register_file.v", "alu.v", "flags_reg.v", "data_memory.v",
     "control_unit.v", "io_bus.v",
+    "nn_accel.v", "nn_mac_pipe.v", "nn_act.v", "nn_lut_rom.v",
 ]
 
 
@@ -85,7 +86,7 @@ def compile_and_simulate_dut(hex_path, work_dir, test_name):
     if r.returncode != 0:
         return None, f"iverilog compile failed:\n{r.stdout}{r.stderr}"
 
-    r = run(["vvp", str(sim_bin)])
+    r = run(["vvp", str(sim_bin), f"+IMEM={hex_path}"])
     if r.returncode != 0:
         return None, f"vvp simulation failed:\n{r.stdout}{r.stderr}"
 

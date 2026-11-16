@@ -1,21 +1,3 @@
-// control_unit.v -- the FSM that sequences every instruction
-// Owner: member C -- this is YOUR module; you are individually examined
-// on it at the oral defence, and it is the heart of your microarchitecture
-// choice (Section 4.3).
-// Spec: Section 6. Port list is FROZEN.
-//
-// This is deliberately the least finished file in this repository: the
-// control unit is the one part of the design the spec leaves entirely
-// up to you (single-cycle, multi-cycle, or pipelined -- Section 4.3),
-// and it is what the recommended state machine and control-signal
-// table in Section 6 describe. Copying a working FSM from anywhere
-// would defeat the point of the assignment and of the oral defence.
-//
-// What every implementation must guarantee, regardless of style
-// (Section 8.2, R22): instructions retire in program order, and
-// `retire` pulses exactly once per retired instruction -- never zero,
-// never twice.
-
 module control_unit (
     input  wire       clk,
     input  wire       rst_n,
