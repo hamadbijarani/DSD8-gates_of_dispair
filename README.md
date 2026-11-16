@@ -72,7 +72,7 @@ On Debian/Ubuntu, the tools are typically installed with:
 sudo apt install python3 python3-numpy iverilog verilator gtkwave
 ```
 
-The generated models, LUTs, assembly programs, and CNN stream are already included, so retraining is not required to run the normal verification flow.
+The generated LUTs, quantized model data, and CNN stream are included, so retraining is not required to run the normal verification flow. Generated benchmark programs, `build/` output, the MNIST cache, and Python caches are not tracked in git: `make bench` and `make cnnbench` regenerate their programs automatically, and `cnn/train_cnn.py` downloads MNIST once (into `cnn/data/mnist/`) only when intentionally retraining.
 
 ## Quick start
 
@@ -283,7 +283,7 @@ build/                generated binaries, traces, metrics, benchmarks, and VCD
 doc/                  report and bug-log templates
 ```
 
-`rtl/nn_lut_rom.v`, `tests/nn/*.asm`, and `tests/cnn/*.asm` are generated artifacts. Regenerate them through `nn/gen_lut.py`, `make nn`, and `make cnn`; do not edit them by hand.
+`rtl/nn_lut_rom.v`, `tests/nn/*.asm`, and `tests/cnn/*.asm` are generated artifacts and are not tracked in git. Regenerate them through `nn/gen_lut.py`, `make nn`, and `make cnn`; do not edit them by hand (`make bench` and `make cnnbench` regenerate their programs automatically).
 
 ## Verification targets
 

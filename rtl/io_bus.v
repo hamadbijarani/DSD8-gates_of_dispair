@@ -1,21 +1,3 @@
-// io_bus.v -- port address decode and the io_ready handshake
-// Owner: member C -- this is YOUR module; you are individually examined
-// on it at the oral defence.
-// Spec: Section 7. The CPU-facing side of this module (the six signals
-// wired to dsd8_cpu) is frozen by Section 7.1's signal table. The
-// board/peripheral-facing side below is NOT dictated verbatim by the
-// spec excerpts this template was built from -- treat those ports as a
-// starting design, confirm them against your own course's Section 5.11
-// if one exists, and adjust freely; unlike dsd8_cpu, no external
-// testbench binds to io_bus's peripheral-facing ports by name.
-//
-// What is required (Section 7.1, R19-R21): decode io_port into the
-// right peripheral, forward io_rd/io_wr and stall the CPU (by holding
-// io_ready low) until the addressed peripheral is ready. Ports 0x00 to
-// 0x3F are reserved and behave exactly per Section 7.2's table; reads
-// of an unmapped port return 0x00, writes to one are discarded, and no
-// port may ever hold io_ready low indefinitely.
-
 module io_bus #(
     parameter NN_ENABLE = 1,
     parameter NN_POSTED = 0
@@ -96,7 +78,6 @@ module io_bus #(
     assign periph_rd    = request && is_periph && io_rd;
     assign periph_wr    = request && is_periph && io_wr;
 
-    wire periph_act = request && is_periph;
     assign io_rdata  = nn_hit ? nn_rdata : (is_local ? local_rdata : periph_rdata);
     assign io_ready  = !request ? 1'b0 : (nn_hit ? nn_ready : (is_local ? local_ready : periph_ready));
 
