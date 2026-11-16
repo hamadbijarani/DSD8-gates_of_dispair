@@ -1,6 +1,0 @@
-cycles 1227
-start 89
-end 1176
-retired 300
-errors 0
-leds 00

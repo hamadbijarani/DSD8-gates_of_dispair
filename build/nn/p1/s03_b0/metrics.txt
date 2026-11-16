@@ -1,6 +1,0 @@
-cycles 43015
-start 717
-end 42956
-retired 11653
-errors 0
-leds 01
