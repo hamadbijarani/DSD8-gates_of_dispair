@@ -315,7 +315,7 @@ To run on physical hardware, add the selected board's constraints and clocking, 
 - Run `make cnnbench` after CNN model, stream, or generator changes.
 - Mirror architectural changes in RTL, the golden simulators (`dsd8sim`, `dsd8sim_nn`, `dsd8sim_cnn`), the bit-exact references (`nn_ref`, `cnn_ref`), and the relevant testbenches.
 - Install the local pre-push checks with `./scripts/install_hooks.sh` if desired.
-- Do not assume hosted CI or board files are present; this checkout's guaranteed certification path is the local Makefile and scripts above.
+- Hosted CI is configured in `.github/workflows/`: `ci.yml` runs lint, unit tests, and conformance on pushes/PRs (conformance is informational on ordinary PRs and authoritative on pushes and tags), and `milestone.yml` runs `make all` on milestone tags. The same checks remain available locally through the Makefile and scripts above; no board files are included.
 
 See `STUDENT_GUIDE.md` for the teaching-oriented walkthrough and `PROJECT_DOCUMENTATION_AND_REPORT.md` for the complete engineering handbook, formal academic report, and submission appendices.
 
